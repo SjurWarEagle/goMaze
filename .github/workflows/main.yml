@@ -1,0 +1,26 @@
+name: Build&Push Docker
+
+on:
+  push:
+    branches:
+      - 'master'
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        build: [
+          { name: buildGo, platform: linux/amd64, os: ubuntu-latest, artifact: 'build/goMaze' },
+          { name: buildGo, platform: windows/amd64, os: windows-latest, artifact: 'build/goMaze.exe' }
+        ]
+    runs-on: ${{ matrix.build.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+      - run: go version
+      - run: go clean -modcache
+      - run: go get
+      - run: go build -o ${{ matrix.build.artifact }}
