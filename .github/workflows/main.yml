@@ -21,6 +21,5 @@ jobs:
         with:
           go-version-file: 'go.mod'
       - run: go version
-      - run: go clean -modcache
       - run: go get
       - run: go build -o ${{ matrix.build.artifact }}

@@ -3,14 +3,11 @@ package main
 type SolverDijkstra struct {
 }
 
-func (solver SolverDijkstra) FillSolutionDistance(maze Maze) {
-
-}
 func (solver SolverDijkstra) Solve(maze Maze) {
 	current := maze.getStart()
 	current.distanceFromStart = 0
-	maze.getCell(current.x, current.y)
-	itertations := 0
+	//maze.getCell(current.x, current.y)
+	iterations := 0
 	cellStack := make(cellStack, 0)
 	cellStack = cellStack.Push(current)
 
@@ -23,7 +20,7 @@ func (solver SolverDijkstra) Solve(maze Maze) {
 		}
 
 		unvisitedOrthogonalNeighbours := maze.GetWalkableOrthogonalNeighbours(current)
-		for cnt := range len(unvisitedOrthogonalNeighbours) {
+		for cnt := 0; cnt < len(unvisitedOrthogonalNeighbours); cnt++ {
 			neighbour := unvisitedOrthogonalNeighbours[cnt]
 			if neighbour.distanceFromStart == -1 {
 				neighbour.distanceFromStart = current.distanceFromStart + 1
@@ -31,18 +28,9 @@ func (solver SolverDijkstra) Solve(maze Maze) {
 			}
 		}
 
-		itertations++
-		if itertations > 1_000_000_000 {
+		iterations++
+		if iterations > 1_000_000_000 {
 			panic("Too many loops!")
 		}
 	}
-}
-
-func filter(ss []*Cell, test func(*Cell) bool) (ret []*Cell) {
-	for _, s := range ss {
-		if test(s) {
-			ret = append(ret, s)
-		}
-	}
-	return
 }
