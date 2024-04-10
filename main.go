@@ -2,7 +2,7 @@ package main
 
 func main() {
 	maze := Maze{}
-	maze.init(10, 10)
+	maze.init(15, 15)
 	generator := MazeGenerator{}
 	generator.fill(maze)
 
