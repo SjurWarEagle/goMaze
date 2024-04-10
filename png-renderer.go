@@ -13,9 +13,12 @@ type PngRenderer struct {
 }
 
 func (r PngRenderer) drawFloors(myImage draw.Image, maze Maze, sizeOfCell int, borderWidth int, strokeThickness int) {
+	startPosition := maze.getStart()
+	endPosition := maze.getFinish()
+
 	var maxDistance int
-	for x := 0; x < mazeWidth; x++ {
-		for y := 0; y < mazeHeight; y++ {
+	for x := 0; x < maze.MazeWidth; x++ {
+		for y := 0; y < maze.MazeHeight; y++ {
 			cell, err := maze.getCell(x, y)
 			if err != nil {
 				panic(err)
@@ -24,19 +27,43 @@ func (r PngRenderer) drawFloors(myImage draw.Image, maze Maze, sizeOfCell int, b
 		}
 	}
 
-	for x := 0; x < mazeWidth; x++ {
-		for y := 0; y < mazeHeight; y++ {
+	for x := 0; x < maze.MazeWidth; x++ {
+		for y := 0; y < maze.MazeHeight; y++ {
 			cell, err := maze.getCell(x, y)
 			if err != nil {
 				panic(err)
 			}
 			imageX := borderWidth + x*sizeOfCell
 			imageY := borderWidth + y*sizeOfCell
-			floorColor := color.RGBA{
-				R: uint8(cell.distanceFromStart * 255 / maxDistance),
-				A: 255,
-			}
+			var floorColor color.RGBA
 
+			if x == startPosition.x && y == startPosition.y {
+				floorColor = color.RGBA{
+					R: 0,
+					G: 0,
+					B: 200,
+					A: 255,
+				}
+			} else if x == endPosition.x && y == endPosition.y {
+				floorColor = color.RGBA{
+					R: 0,
+					G: 200,
+					B: 0,
+					A: 255,
+				}
+			} else if cell.distanceFromStart == -1 {
+				floorColor = color.RGBA{
+					R: 200,
+					G: 200,
+					B: 200,
+					A: 255,
+				}
+			} else {
+				floorColor = color.RGBA{
+					R: uint8(cell.distanceFromStart * 255 / maxDistance),
+					A: 255,
+				}
+			}
 			floor := image.Rect(imageX-sizeOfCell/2-strokeThickness, imageY-sizeOfCell/2-strokeThickness, imageX+sizeOfCell/2+strokeThickness, imageY+sizeOfCell/2+strokeThickness)
 			draw.Draw(myImage, floor, &image.Uniform{C: floorColor}, image.Point{}, draw.Src)
 		}
@@ -45,8 +72,8 @@ func (r PngRenderer) drawFloors(myImage draw.Image, maze Maze, sizeOfCell int, b
 
 func (r PngRenderer) drawWalls(myImage draw.Image, maze Maze, sizeOfCell int, borderWidth int, strokeThickness int) {
 
-	for x := 0; x < mazeWidth; x++ {
-		for y := 0; y < mazeHeight; y++ {
+	for x := 0; x < maze.MazeWidth; x++ {
+		for y := 0; y < maze.MazeHeight; y++ {
 			cell, err := maze.getCell(x, y)
 			if err != nil {
 				panic(err)
@@ -83,7 +110,7 @@ func (r PngRenderer) render(maze Maze) {
 	strokeThickness := 1
 
 	// https://go.dev/blog/image-draw
-	myImage := image.NewRGBA(image.Rect(0, 0, sizeOfCell*mazeWidth+2*border, sizeOfCell*mazeHeight+2*border)) // x1,y1,  x2,y2 of background rectangle
+	myImage := image.NewRGBA(image.Rect(0, 0, sizeOfCell*maze.MazeWidth+2*border, sizeOfCell*maze.MazeHeight+2*border)) // x1,y1,  x2,y2 of background rectangle
 
 	// back-fill entire background surface
 	draw.Draw(myImage, myImage.Bounds(), &image.Uniform{C: color.White}, image.Point{}, draw.Src)

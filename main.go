@@ -2,15 +2,13 @@ package main
 
 func main() {
 	maze := Maze{}
-	maze.init(200, 200)
+	maze.init(10, 10)
 	generator := MazeGenerator{}
 	generator.fill(maze)
 
-	//maze.PrettyPrintAllCells()
-
-	maze.resetVisitedMarker()
-	solver := SolverDijkstra{}
-	solver.Solve(maze)
+	//	maze.resetVisitedMarker()
+	//	solver := SolverDijkstra{}
+	//	solver.Solve(maze)
 
 	renderer := PngRenderer{}
 	renderer.render(maze)

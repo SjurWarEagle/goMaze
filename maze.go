@@ -2,50 +2,55 @@ package main
 
 import "fmt"
 
-type Maze struct{}
+type Maze struct {
+	MazeWidth  int
+	MazeHeight int
+	cells      [][]Cell
+}
 
-var mazeWidth int
-var mazeHeight int
-var cells [][]Cell
+func (m *Maze) init(width int, height int) {
+	m.MazeWidth = width
+	m.MazeHeight = height
 
-func (m Maze) init(width int, height int) {
-	mazeWidth = width
-	mazeHeight = height
-
-	newCells := make([][]Cell, mazeWidth)
-	for x := range mazeWidth {
-		newCells[x] = make([]Cell, mazeHeight)
+	newCells := make([][]Cell, m.MazeWidth)
+	for x := 0; x < m.MazeWidth; x++ {
+		newCells[x] = make([]Cell, m.MazeHeight)
 	}
-	cells = newCells
+	m.cells = newCells
 
-	for x := range width {
-		for y := range height {
-			cells[x][y] = NewCell(x, y)
+	for x := 0; x < m.MazeWidth; x++ {
+		for y := 0; y < m.MazeHeight; y++ {
+			m.cells[x][y] = NewCell(x, y)
 		}
 	}
 	m.fillCellsWithOuterBorder()
 }
 
-func (m Maze) fillCellsWithOuterBorder() {
-	for x := 0; x < mazeWidth; x++ {
-		cells[x][0].walls[NORTH] = true
-		cells[x][mazeHeight-1].walls[SOUTH] = true
+func (m *Maze) fillCellsWithOuterBorder() {
+	for x := 0; x < m.MazeWidth; x++ {
+		m.cells[x][0].walls[NORTH] = true
+		m.cells[x][m.MazeHeight-1].walls[SOUTH] = true
 	}
-	for y := 0; y < mazeHeight; y++ {
-		cells[0][y].walls[WEST] = true
-		cells[mazeWidth-1][y].walls[EAST] = true
+	for y := 0; y < m.MazeHeight; y++ {
+		m.cells[0][y].walls[WEST] = true
+		m.cells[m.MazeWidth-1][y].walls[EAST] = true
 	}
 }
 
-func (m Maze) getStart() *Cell {
+func (m *Maze) getStart() *Cell {
 	//TODO define start with random field during init
-	return &cells[1][1]
+	return &m.cells[1][1]
 }
 
-func (m Maze) PrettyPrintAllCells() {
-	for x := 0; x < mazeWidth; x++ {
-		for y := 0; y < mazeHeight; y++ {
-			pWalls := &cells[x][y].walls
+func (m *Maze) getFinish() *Cell {
+	//TODO define start with random field during init
+	return &m.cells[m.MazeWidth-2][m.MazeHeight-2]
+}
+
+func (m *Maze) PrettyPrintAllCells() {
+	for x := 0; x < m.MazeWidth; x++ {
+		for y := 0; y < m.MazeHeight; y++ {
+			pWalls := &m.cells[x][y].walls
 
 			if pWalls[NORTH] {
 				fmt.Print("N")
@@ -72,12 +77,12 @@ func (m Maze) PrettyPrintAllCells() {
 		fmt.Print("\n")
 	}
 }
-func (m Maze) PrintAllCells() {
-	for x := 0; x < mazeWidth; x++ {
-		for y := 0; y < mazeHeight; y++ {
+func (m *Maze) PrintAllCells() {
+	for x := 0; x < m.MazeWidth; x++ {
+		for y := 0; y < m.MazeHeight; y++ {
 			fmt.Printf("(%2d,%2d): ", x, y)
 
-			pWalls := &cells[x][y].walls
+			pWalls := &m.cells[x][y].walls
 			var wall string
 			if pWalls[NORTH] {
 				wall = "|"
@@ -110,25 +115,25 @@ func (m Maze) PrintAllCells() {
 	}
 }
 
-func (m Maze) resetVisitedMarker() {
-	for x := range mazeWidth {
-		for y := range mazeHeight {
-			cells[x][y].visited = false
+func (m *Maze) resetVisitedMarker() {
+	for x := 0; x < m.MazeWidth; x++ {
+		for y := 0; y < m.MazeHeight; y++ {
+			m.cells[x][y].visited = false
 		}
 	}
 }
 
-func (m Maze) getCell(x int, y int) (*Cell, error) {
-	if x < 0 || x > mazeWidth-1 {
+func (m *Maze) getCell(x int, y int) (*Cell, error) {
+	if x < 0 || x > m.MazeWidth-1 {
 		return nil, fmt.Errorf("no cell at x=%d,y=%d", x, y)
 	}
-	if y < 0 || y > mazeHeight-1 {
+	if y < 0 || y > m.MazeHeight-1 {
 		return nil, fmt.Errorf("no cell at x=%d,y=%d", x, y)
 	}
-	return &cells[x][y], nil
+	return &m.cells[x][y], nil
 }
 
-func (m Maze) GetWalkableOrthogonalNeighbours(current *Cell) []*Cell {
+func (m *Maze) GetWalkableOrthogonalNeighbours(current *Cell) []*Cell {
 	var rc []*Cell
 
 	//get western
@@ -157,7 +162,7 @@ func (m Maze) GetWalkableOrthogonalNeighbours(current *Cell) []*Cell {
 	return rc
 }
 
-func (m Maze) GetUnvisitedOrthogonalNeighbours(current *Cell) []*Cell {
+func (m *Maze) GetUnvisitedOrthogonalNeighbours(current *Cell) []*Cell {
 	var rc []*Cell
 
 	cell, err := m.getCell(current.x-1, current.y)
@@ -182,7 +187,7 @@ func (m Maze) GetUnvisitedOrthogonalNeighbours(current *Cell) []*Cell {
 	return rc
 }
 
-func (m Maze) RemoveWalls(current *Cell, next *Cell) {
+func (m *Maze) RemoveWalls(current *Cell, next *Cell) {
 	if current.x < next.x {
 		// cell1 <- cell2
 		current.walls[EAST] = false
