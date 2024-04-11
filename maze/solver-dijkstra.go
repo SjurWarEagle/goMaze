@@ -1,12 +1,12 @@
-package main
+package maze
 
 type SolverDijkstra struct {
 }
 
 func (solver SolverDijkstra) Solve(maze Maze) {
-	current := maze.getStart()
-	current.distanceFromStart = 0
-	//maze.getCell(current.x, current.y)
+	current := maze.GetStart()
+	current.DistanceFromStart = 0
+	//maze.GetCell(current.X, current.Y)
 	iterations := 0
 	cellStack := make(cellStack, 0)
 	cellStack = cellStack.Push(current)
@@ -22,8 +22,8 @@ func (solver SolverDijkstra) Solve(maze Maze) {
 		unvisitedOrthogonalNeighbours := maze.GetWalkableOrthogonalNeighbours(current)
 		for cnt := 0; cnt < len(unvisitedOrthogonalNeighbours); cnt++ {
 			neighbour := unvisitedOrthogonalNeighbours[cnt]
-			if neighbour.distanceFromStart == -1 {
-				neighbour.distanceFromStart = current.distanceFromStart + 1
+			if neighbour.DistanceFromStart == -1 {
+				neighbour.DistanceFromStart = current.DistanceFromStart + 1
 				cellStack = cellStack.Push(neighbour)
 			}
 		}

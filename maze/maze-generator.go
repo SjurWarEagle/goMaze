@@ -1,4 +1,4 @@
-package main
+package maze
 
 import "math/rand/v2"
 
@@ -21,9 +21,9 @@ MazeGenerator
 type MazeGenerator struct {
 }
 
-func (generator MazeGenerator) fill(maze Maze) {
+func (generator MazeGenerator) Fill(maze Maze) {
 	cellStack := make(cellStack, 0)
-	start := maze.getStart()
+	start := maze.GetStart()
 	currentCell := start
 	cellStack = cellStack.Push(currentCell)
 
