@@ -13,10 +13,13 @@ import (
 	"image"
 	"image/color"
 	"log"
+	"math"
 	"os"
 )
 
 var myMaze = maze.Maze{}
+var maxWidthOfMaze = 30
+var desiredWidthOfMaze = new(widget.Float)
 
 func main() {
 	go createWindow()
@@ -39,10 +42,11 @@ func createWindow() {
 
 func run(w *app.Window) error {
 	th := material.NewTheme()
+	var widthSlider = material.Slider(th, desiredWidthOfMaze)
 	var ops op.Ops
 	// generateButton is a clickable widget
 	var generateButton widget.Clickable
-	myMaze := generateMaze()
+	generateMaze()
 
 	for {
 		switch eventType := w.Event().(type) {
@@ -53,8 +57,10 @@ func run(w *app.Window) error {
 			// This graphics context is used for managing the rendering state.
 			gtx := app.NewContext(&ops, eventType)
 
+			updateMazeIfNewWidthIsRequested()
+
 			if generateButton.Clicked(gtx) {
-				myMaze = generateMaze()
+				generateMaze()
 			} else {
 				layout.Flex{
 					// Vertical alignment, from top to bottom
@@ -65,6 +71,11 @@ func run(w *app.Window) error {
 						func(gtx layout.Context) layout.Dimensions {
 							label := material.H3(th, "Maze")
 							return label.Layout(gtx)
+						},
+					),
+					layout.Rigid(
+						func(gtx layout.Context) layout.Dimensions {
+							return widthSlider.Layout(gtx)
 						},
 					),
 					//layout.Rigid(
@@ -83,7 +94,7 @@ func run(w *app.Window) error {
 					//		return layout.Dimensions{Size: d}
 					//	},
 					//),
-					generateMazeVisuals(th, myMaze, ops),
+					generateMazeVisuals(th, gtx, myMaze, ops),
 					layout.Rigid(
 						// ... then one to hold an empty spacer
 						//	The height of the spacer is 25 Device independent pixels
@@ -104,16 +115,24 @@ func run(w *app.Window) error {
 	}
 }
 
-func generateMaze() maze.Maze {
-	myMaze.Init(10, 10)
-	generator := maze.MazeGenerator{}
-	generator.Fill(myMaze)
-
-	return myMaze
+func updateMazeIfNewWidthIsRequested() {
+	width := int(math.Max(3, float64(desiredWidthOfMaze.Value*float32(maxWidthOfMaze))))
+	if width != myMaze.MazeWidth {
+		generateMaze()
+	}
 }
 
-func generateMazeVisuals(th *material.Theme, maze maze.Maze, ops op.Ops) layout.FlexChild {
-	cellWidth := 50
+func generateMaze() {
+	width := int(math.Max(3, float64(desiredWidthOfMaze.Value*float32(maxWidthOfMaze))))
+	height := int(math.Max(3, float64(desiredWidthOfMaze.Value*float32(maxWidthOfMaze))))
+	myMaze.Init(width, height)
+	myMaze.SetRandomStartFinish()
+	generator := maze.MazeGenerator{}
+	generator.Fill(myMaze)
+}
+
+func generateMazeVisuals(th *material.Theme, gtx layout.Context, maze maze.Maze, ops op.Ops) layout.FlexChild {
+	cellWidth := determineCellWidth(gtx, maze)
 	return layout.Rigid(
 		func(gtx layout.Context) layout.Dimensions {
 			renderCells(gtx, maze, cellWidth, ops)
@@ -121,6 +140,14 @@ func generateMazeVisuals(th *material.Theme, maze maze.Maze, ops op.Ops) layout.
 			return layout.Dimensions{Size: image.Point{Y: maze.MazeHeight * cellWidth}}
 		},
 	)
+}
+
+func determineCellWidth(gtx layout.Context, maze maze.Maze) int {
+	maxSize := gtx.Constraints.Max
+	widthToUse := maze.MazeWidth + 1
+	heightToUse := maze.MazeHeight + 1
+	cellWidth := int(math.Min(float64(maxSize.X/widthToUse), float64(maxSize.Y/heightToUse)))
+	return cellWidth
 }
 
 func renderCells(gtx layout.Context, maze maze.Maze, cellWidth int, ops op.Ops) {
@@ -145,9 +172,10 @@ func renderCells(gtx layout.Context, maze maze.Maze, cellWidth int, ops op.Ops) 
 }
 
 func renderWall(gtx layout.Context, mazeCell *maze.Cell, cellWidth int, ops op.Ops) {
-	wallColor := color.NRGBA{R: 250, G: 0, B: 0, A: 255}
-	startX := 100 + cellWidth*mazeCell.X
-	startY := 100 + cellWidth*mazeCell.Y
+	wallColor := color.NRGBA{R: 0, G: 0, B: 0, A: 255}
+	border := cellWidth / 2
+	startX := border + cellWidth/2 + cellWidth*mazeCell.X
+	startY := border + cellWidth/2 + cellWidth*mazeCell.Y
 	wallThickness := 4
 
 	if mazeCell.Walls[maze.NORTH] {
@@ -180,14 +208,29 @@ func renderWall(gtx layout.Context, mazeCell *maze.Cell, cellWidth int, ops op.O
 	}
 }
 func renderFloor(gtx layout.Context, mazeCell *maze.Cell, cellWidth int, ops op.Ops) {
-	floorColor := color.NRGBA{R: 155, G: 155, B: 155, A: 255}
-	startX := 100 + cellWidth*mazeCell.X
-	startY := 100 + cellWidth*mazeCell.Y
+	floorColor := color.NRGBA{R: 230, G: 230, B: 230, A: 255}
+	startColor := color.NRGBA{R: 0, G: 230, B: 0, A: 255}
+	finishColor := color.NRGBA{R: 0, G: 0, B: 230, A: 255}
+	border := cellWidth / 2
+	startX := border + cellWidth/2 + cellWidth*mazeCell.X
+	startY := border + cellWidth/2 + cellWidth*mazeCell.Y
+
+	isStart := mazeCell.X == myMaze.GetStart().X && mazeCell.Y == myMaze.GetStart().Y
+	isFinish := mazeCell.X == myMaze.GetFinish().X && mazeCell.Y == myMaze.GetFinish().Y
 
 	cell := clip.Rect{
 		Min: image.Pt(startX-cellWidth/2, startY-cellWidth/2),
 		Max: image.Pt(startX+cellWidth/2, startY+cellWidth/2),
 	}.Op()
-	paint.FillShape(gtx.Ops, floorColor, cell)
+	if isStart {
+		paint.FillShape(gtx.Ops, startColor, cell)
+
+	} else if isFinish {
+		paint.FillShape(gtx.Ops, finishColor, cell)
+
+	} else {
+		paint.FillShape(gtx.Ops, floorColor, cell)
+
+	}
 
 }

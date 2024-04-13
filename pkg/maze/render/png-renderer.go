@@ -1,7 +1,6 @@
 package maze_render
 
 import (
-	"goMaze/maze"
 	"image"
 	"image/color"
 	"image/draw"
@@ -115,7 +114,7 @@ func (r PngRenderer) drawWalls(myImage draw.Image, givenMaze maze.Maze, sizeOfCe
 }
 
 func (r PngRenderer) Render(maze maze.Maze) {
-	file := "./output/maze.png"
+	file := "./output/pkg.maze.png"
 	sizeOfCell := 20
 	border := 15
 	strokeThickness := 1

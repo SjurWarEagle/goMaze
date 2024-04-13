@@ -1,6 +1,9 @@
 package maze
 
-import "fmt"
+import (
+	"fmt"
+	"math/rand/v2"
+)
 
 type Maze struct {
 	MazeWidth  int
@@ -40,13 +43,19 @@ func (m *Maze) fillCellsWithOuterBorder() {
 }
 
 func (m *Maze) GetStart() *Cell {
-	//TODO define start with random field during Init
-	return &m.cells[1][1]
+	cell, err := m.GetCell(m.start[0], m.start[1])
+	if err != nil {
+		panic(err)
+	}
+	return cell
 }
 
 func (m *Maze) GetFinish() *Cell {
-	//TODO define start with random field during Init
-	return &m.cells[m.MazeWidth-2][m.MazeHeight-2]
+	cell, err := m.GetCell(m.finish[0], m.finish[1])
+	if err != nil {
+		panic(err)
+	}
+	return cell
 }
 
 func (m *Maze) PrettyPrintAllCells() {
@@ -208,4 +217,11 @@ func (m *Maze) RemoveWalls(current *Cell, next *Cell) {
 		next.Walls[NORTH] = false
 	}
 
+}
+
+func (m *Maze) SetRandomStartFinish() {
+	m.start[0] = rand.IntN(int(m.MazeWidth / 2))
+	m.start[1] = rand.IntN(int(m.MazeHeight / 2))
+	m.finish[0] = m.MazeWidth/2 + rand.IntN(int(m.MazeWidth/2))
+	m.finish[1] = m.MazeWidth/2 + rand.IntN(int(m.MazeHeight/2))
 }

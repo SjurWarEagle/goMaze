@@ -17,8 +17,8 @@
       <option name="region" />
       <option name="useCurrentConnection" value="false" />
     </EXTENSION>
-    <kind value="PACKAGE" />
-    <package value="goMaze" />
+    <kind value="DIRECTORY" />
+    <package value="." />
     <directory value="$PROJECT_DIR$" />
     <filePath value="$PROJECT_DIR$/main.go" />
     <method v="2" />

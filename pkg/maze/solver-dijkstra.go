@@ -6,7 +6,7 @@ type SolverDijkstra struct {
 func (solver SolverDijkstra) Solve(maze Maze) {
 	current := maze.GetStart()
 	current.DistanceFromStart = 0
-	//maze.GetCell(current.X, current.Y)
+	//pkg.maze.GetCell(current.X, current.Y)
 	iterations := 0
 	cellStack := make(cellStack, 0)
 	cellStack = cellStack.Push(current)

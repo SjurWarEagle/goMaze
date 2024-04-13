@@ -1,8 +1,9 @@
-module goMaze
+module main
 
 go 1.22.2
 
 require gioui.org v0.6.0
+require github.com/SjurWarEagle/goMaze/pkg/maze v0.0.1
 
 require (
 	gioui.org/cpu v0.0.0-20210817075930-8d6a761490d2 // indirect
