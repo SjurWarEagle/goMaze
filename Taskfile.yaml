@@ -1,0 +1,12 @@
+version: '3'
+
+tasks:
+  startGo:
+    cmds:
+      - go run goMaze
+    silent: false
+  startAndroid:
+    cmds:
+      - gogio -target android  goMaze
+      - adb install goMaze.apk
+    silent: false
