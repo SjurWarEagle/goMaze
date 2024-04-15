@@ -21,5 +21,23 @@ jobs:
         with:
           go-version-file: 'go.mod'
       - run: go version
-      - run: go get
-      - run: go build -o ${{ matrix.build.artifact }}
+#      - run: go clean -modcache
+
+      - if: startsWith(matrix.build.os,'ubuntu')
+        name: go build
+        run: |
+          sudo apt install -y \
+                 libwayland-dev libegl-dev
+#            libvulkan-dev libxkbcommon-x11-dev \
+#            libxkbcommon-dev libwayland-client0 \
+#            libxcursor-dev libxinerama-dev \
+#            libxrandr-dev libxi-dev \
+#            libx11-xcb-dev \
+#            libgl-dev libxxf86vm-dev
+#          go get
+          go build -o ${{ matrix.build.artifact }}
+      - if: startsWith(matrix.build.os,'windows')
+        name: go build
+        run: |
+          go get
+          go build -o ${{ matrix.build.artifact }}
