@@ -5,6 +5,7 @@ import (
 	"image/color"
 	"image/draw"
 	"image/png"
+	"main/maze"
 	"math"
 	"os"
 )

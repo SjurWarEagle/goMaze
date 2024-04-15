@@ -9,10 +9,10 @@ import (
 	"gioui.org/unit"
 	"gioui.org/widget"
 	"gioui.org/widget/material"
-	"goMaze/maze"
 	"image"
 	"image/color"
 	"log"
+	"main/maze"
 	"math"
 	"os"
 )
@@ -28,11 +28,8 @@ func main() {
 
 func createWindow() {
 	w := new(app.Window)
-	w.Option(
-		app.Title("Maze Runner"),
-		// app.Decorated(false),
-		app.Size(unit.Dp(400), unit.Dp(600)),
-	)
+	w.Option(app.Title("Maze Runner"), // app.Decorated(false),
+		app.Size(unit.Dp(400), unit.Dp(600)))
 	err := run(w)
 	if err != nil {
 		log.Fatal(err)
@@ -66,19 +63,12 @@ func run(w *app.Window) error {
 					// Vertical alignment, from top to bottom
 					Axis:    layout.Vertical,
 					Spacing: layout.SpaceBetween,
-				}.Layout(gtx,
-					layout.Rigid(
-						func(gtx layout.Context) layout.Dimensions {
-							label := material.H3(th, "Maze")
-							return label.Layout(gtx)
-						},
-					),
-					layout.Rigid(
-						func(gtx layout.Context) layout.Dimensions {
-							return widthSlider.Layout(gtx)
-						},
-					),
-					//layout.Rigid(
+				}.Layout(gtx, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+					label := material.H3(th, "Maze")
+					return label.Layout(gtx)
+				}), layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+					return widthSlider.Layout(gtx)
+				}), //layout.Rigid(
 					//	func(gtx layout.Context) layout.Dimensions {
 					//		circle := clip.Ellipse{
 					//			// Hard coding the x coordinate. Try resizing the window
@@ -94,21 +84,15 @@ func run(w *app.Window) error {
 					//		return layout.Dimensions{Size: d}
 					//	},
 					//),
-					generateMazeVisuals(th, gtx, myMaze, ops),
-					layout.Rigid(
+					generateMazeVisuals(th, gtx, myMaze, ops), layout.Rigid(
 						// ... then one to hold an empty spacer
 						//	The height of the spacer is 25 Device independent pixels
 						layout.Spacer{
 							Height: unit.Dp(25),
-						}.Layout,
-					),
-					layout.Rigid(
-						func(gtx layout.Context) layout.Dimensions {
-							btn := material.Button(th, &generateButton, "Generate")
-							return btn.Layout(gtx)
-						},
-					),
-				)
+						}.Layout), layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+						btn := material.Button(th, &generateButton, "Generate")
+						return btn.Layout(gtx)
+					}))
 				eventType.Frame(gtx.Ops)
 			}
 		}
@@ -133,13 +117,11 @@ func generateMaze() {
 
 func generateMazeVisuals(th *material.Theme, gtx layout.Context, maze maze.Maze, ops op.Ops) layout.FlexChild {
 	cellWidth := determineCellWidth(gtx, maze)
-	return layout.Rigid(
-		func(gtx layout.Context) layout.Dimensions {
-			renderCells(gtx, maze, cellWidth, ops)
-			//paint.FillShape(gtx.Ops, fillColor, circle)
-			return layout.Dimensions{Size: image.Point{Y: maze.MazeHeight * cellWidth}}
-		},
-	)
+	return layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+		renderCells(gtx, maze, cellWidth, ops)
+		//paint.FillShape(gtx.Ops, fillColor, circle)
+		return layout.Dimensions{Size: image.Point{Y: maze.MazeHeight * cellWidth}}
+	})
 }
 
 func determineCellWidth(gtx layout.Context, maze maze.Maze) int {
@@ -151,27 +133,27 @@ func determineCellWidth(gtx layout.Context, maze maze.Maze) int {
 }
 
 func renderCells(gtx layout.Context, maze maze.Maze, cellWidth int, ops op.Ops) {
-	for mazeX := range maze.MazeWidth {
-		for mazeY := range maze.MazeWidth {
+	for mazeX := 0; mazeX < maze.MazeWidth; mazeX++ {
+		for mazeY := 0; mazeY < maze.MazeHeight; mazeY++ {
 			cell, err := maze.GetCell(mazeX, mazeY)
 			if err != nil {
 				panic(err)
 			}
-			renderFloor(gtx, cell, cellWidth, ops)
+			renderFloor(gtx, cell, cellWidth)
 		}
 	}
-	for mazeX := range maze.MazeWidth {
-		for mazeY := range maze.MazeWidth {
+	for mazeX := 0; mazeX < maze.MazeWidth; mazeX++ {
+		for mazeY := 0; mazeY < maze.MazeHeight; mazeY++ {
 			cell, err := maze.GetCell(mazeX, mazeY)
 			if err != nil {
 				panic(err)
 			}
-			renderWall(gtx, cell, cellWidth, ops)
+			renderWall(gtx, cell, cellWidth)
 		}
 	}
 }
 
-func renderWall(gtx layout.Context, mazeCell *maze.Cell, cellWidth int, ops op.Ops) {
+func renderWall(gtx layout.Context, mazeCell *maze.Cell, cellWidth int) {
 	wallColor := color.NRGBA{R: 0, G: 0, B: 0, A: 255}
 	border := cellWidth / 2
 	startX := border + cellWidth/2 + cellWidth*mazeCell.X
@@ -207,7 +189,7 @@ func renderWall(gtx layout.Context, mazeCell *maze.Cell, cellWidth int, ops op.O
 		paint.FillShape(gtx.Ops, wallColor, wall)
 	}
 }
-func renderFloor(gtx layout.Context, mazeCell *maze.Cell, cellWidth int, ops op.Ops) {
+func renderFloor(gtx layout.Context, mazeCell *maze.Cell, cellWidth int) {
 	floorColor := color.NRGBA{R: 230, G: 230, B: 230, A: 255}
 	startColor := color.NRGBA{R: 0, G: 230, B: 0, A: 255}
 	finishColor := color.NRGBA{R: 0, G: 0, B: 230, A: 255}
