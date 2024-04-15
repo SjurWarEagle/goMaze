@@ -47,7 +47,7 @@ func run(w *app.Window) error {
 
 	for {
 		switch eventType := w.Event().(type) {
-		// and this is sent when the application should exits
+		// and this is sent when the application should exit
 		case app.DestroyEvent:
 			os.Exit(0)
 		case app.FrameEvent:
@@ -84,7 +84,7 @@ func run(w *app.Window) error {
 					//		return layout.Dimensions{Size: d}
 					//	},
 					//),
-					generateMazeVisuals(th, gtx, myMaze, ops), layout.Rigid(
+					generateMazeVisuals(gtx, myMaze), layout.Rigid(
 						// ... then one to hold an empty spacer
 						//	The height of the spacer is 25 Device independent pixels
 						layout.Spacer{
@@ -115,10 +115,10 @@ func generateMaze() {
 	generator.Fill(myMaze)
 }
 
-func generateMazeVisuals(th *material.Theme, gtx layout.Context, maze maze.Maze, ops op.Ops) layout.FlexChild {
+func generateMazeVisuals(gtx layout.Context, maze maze.Maze) layout.FlexChild {
 	cellWidth := determineCellWidth(gtx, maze)
 	return layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-		renderCells(gtx, maze, cellWidth, ops)
+		renderCells(gtx, maze, cellWidth)
 		//paint.FillShape(gtx.Ops, fillColor, circle)
 		return layout.Dimensions{Size: image.Point{Y: maze.MazeHeight * cellWidth}}
 	})
@@ -132,7 +132,7 @@ func determineCellWidth(gtx layout.Context, maze maze.Maze) int {
 	return cellWidth
 }
 
-func renderCells(gtx layout.Context, maze maze.Maze, cellWidth int, ops op.Ops) {
+func renderCells(gtx layout.Context, maze maze.Maze, cellWidth int) {
 	for mazeX := 0; mazeX < maze.MazeWidth; mazeX++ {
 		for mazeY := 0; mazeY < maze.MazeHeight; mazeY++ {
 			cell, err := maze.GetCell(mazeX, mazeY)
